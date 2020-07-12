@@ -8,22 +8,22 @@
 #include <stdlib.h>  
 #include <math.h>
 
-/********************队列相关逻辑*********************/
+/********************Queue related logic*********************/
 //strengh the queue struct for the program
 #define N 10  //define the maxsize of the queue
-typedef double data_t;   //队列中数据元素的数据类型  
+typedef double data_t;   //The data type of the data elements in the queue
 typedef struct  
 {  
-     data_t data[N][4]; //用数组作为队列的储存空间 and is B,P,AP AND AB  
-     int front,rear; //指示队头位置和队尾位置的指针 
-	//但是我们在使用的时候用不到front，始终为0； 
-     //rear = N-1 表示队列已满， rear<N-1 表示队列未满
+     data_t data[N][4]; //Use arrays as storage space for queues and is B,P,AP AND AB  
+     int front,rear; //Pointer indicating head position and tail position
+	//But we can’t use front when we use it, it is always 0;
+     //rear = N-1 means the queue is full, rear<N-1 means the queue is not full
 }sequeue_t; 
 
 // create an empty swqueue
 sequeue_t *CreateEmptySequeue()  
 {  
-    sequeue_t *queue;  
+    sequeue_t *queue; //name of the variable of type 'sequeu_t' structure is queue
     queue = (sequeue_t *)malloc(sizeof(sequeue_t));  
     if (NULL == queue) return NULL;  
     memset(queue,0,sizeof(sequeue_t));
@@ -68,7 +68,8 @@ void ClearSequeue(sequeue_t *queue)
     return;  
 } 
 
-//加入队列，补充到队列中最后一个位置
+//Join the queue and add to the last position in the queue
+//ENQUEUE
 int NewEnQueue(sequeue_t *queue, data_t *x)
 {
 	int i;
@@ -80,7 +81,7 @@ int NewEnQueue(sequeue_t *queue, data_t *x)
 
 
 	int count = queue->rear+1;
-	queue->rear = queue->rear+1;  //队列尾+1
+	queue->rear = queue->rear+1;  //End of queue+1
 	for(i=0; i<4;i++){
 		queue->data[count][i] = x[i];
 	}
@@ -89,7 +90,7 @@ int NewEnQueue(sequeue_t *queue, data_t *x)
 
 
 
-//出队  返回值为出队的值
+//Dequeue. The return value is the value of dequeue
 data_t * NewDeQueue(sequeue_t *queue)
 {
 	int i;
@@ -108,7 +109,7 @@ data_t * NewDeQueue(sequeue_t *queue)
 		queue->data[i-1][2] = queue->data[i][2];
 		queue->data[i-1][3] = queue->data[i][3];
 	}
-	queue->rear=queue->rear-1;  //队列尾-1
+	queue->rear=queue->rear-1;  //End of queue-1
 	return values;
 }
 
@@ -134,13 +135,13 @@ void fprintQueue(sequeue_t *queue, FILE* fp1){
 	}
 	fprintf(fp1, "\n\n");
 }
-/********************队列相关逻辑*********************/
+/********************Queue related logic*********************/
 
 
 
 
-/********************网卡数据相关函数*********************/
-//返回值为long data[4],分别代表接收和发送的报文数量和字节数
+/********************Network card data related functions*********************/
+//The return value is long data[4],Represents the number of received and sent packets and bytes, respectively
 
 long *my_ipconfig(char *ath0)  
 {  
@@ -168,7 +169,7 @@ long *my_ipconfig(char *ath0)
             return NULL;  
         }  
         buf[nBytes] = '\0';    //proess the end
-        //返回第一次指向ath0位置的指针  
+        //Returns the first pointer to ath0 
         char* pDev = strstr(buf, ath0);  
         if (NULL == pDev)  
         {  
@@ -180,13 +181,13 @@ long *my_ipconfig(char *ath0)
         char *ifconfig_value;  
         int i = 0;  
         static long rx2_tx10[4];   //ues this value to save the two values we need. 
-        /*去除空格，制表符，换行符等不需要的字段*/  
+        /*Remove unnecessary fields such as spaces, tabs, line breaks, etc.*/  
         for (p = strtok(pDev, " \t\r\n"); p; p = strtok(NULL, " \t\r\n"))  
         {  
             i++;  
             ifconfig_value = (char*)malloc(20);  //20 bytes is enough for ifocnfig_value 
             strcpy(ifconfig_value, p);  
-            /*得到的字符串中的第二个字段是接收流量*/  
+            /*The second field in the resulting string is to receive traffic*/  
             if(i == 2)  
             {  
                 rx2_tx10[0] = atol(ifconfig_value);  //atol change char to long  
@@ -195,7 +196,7 @@ long *my_ipconfig(char *ath0)
             {  
                 rx2_tx10[1] = atol(ifconfig_value);  //atol change char to long  
             }  
-            /*得到的字符串中的第十个字段是发送流量*/  
+            /*The tenth field in the resulting string is the sending traffic*/  
             if(i == 10)  
             {  
                 rx2_tx10[2] = atol(ifconfig_value);  
@@ -210,14 +211,14 @@ long *my_ipconfig(char *ath0)
         return rx2_tx10;  
 }  
 
-/********************网卡数据相关函数*********************/
+/********************Network card data related functions*********************/
 
 
 
 
 
-/********************初始化metric相关函数*********************/
-//返回1s中时间
+/********************Initialize metric related functions*********************/
+//返回1s中时间 //Return time in 1s
 double * Initial_Metrics(char *ethernet_name)
 {
 
@@ -238,14 +239,14 @@ double * Initial_Metrics(char *ethernet_name)
     	tmp_value1[i] = ifconfig_result1[i]/1.0;
     }
 
-    sleep(2.5);
+    sleep(2.5);  //STATS_PERIOD
 
     ifconfig_result2 = my_ipconfig(ethernet_name);
     for(i=0;i<4;i++){
     	tmp_value2[i] = ifconfig_result2[i]/1.0;
     }
     //calculate the metrics
-    metrics[0] = tmp_value2[0]-tmp_value1[0];
+    metrics[0] = tmp_value2[0]-tmp_value1[0];  //DIFF IN THE NUMBER OF PACKETS WITHTIN THAT TIME(2.5s)
     metrics[1] = tmp_value2[1]-tmp_value1[1];
     metrics[2] = (double)(tmp_value2[0]-tmp_value1[0])/(double)(tmp_value2[2]-tmp_value1[2]);
     metrics[3] = (double)(tmp_value2[1]-tmp_value1[1])/(double)(tmp_value2[3]-tmp_value1[3]);
@@ -255,27 +256,27 @@ double * Initial_Metrics(char *ethernet_name)
     return values;
 }
 
-/********************初始化metric相关函数*********************/
+/********************Initialize metric related functions*********************/
 
 
 
-/********************初始化predic_value相关函数*********************/
+/********************Initialize predic_value related functions*********************/
 double *initial_predic(sequeue_t *metrics)
 {
-	//初始化所需变量
+	//Initialize the required variables
 	int i,j;
 	double lamda[N],tmp[4];
 	double *predic_value = (double *)malloc(4*sizeof(double));
 	sequeue_t *metrics_tmp = CreateEmptySequeue();
-	memcpy(metrics_tmp, metrics, sizeof(sequeue_t));
+	memcpy(metrics_tmp, metrics, sizeof(sequeue_t)); 
 
 	//printQueue(metrics_tmp);
-	//初始化lamda
+	//Initialize lamda
 	for(i=0;i<N;i++){
 		lamda[i] = 1/(double)N;
 	}
 
-	//计算当次的predic_value值
+	//Calculate the current predic_value value
 
 	for(j=0; j<N-1; j++){
 		tmp[0] += lamda[j]*(metrics_tmp->data[j+1][0]-metrics_tmp->data[j][0]);
@@ -293,9 +294,9 @@ double *initial_predic(sequeue_t *metrics)
 	return predic_value;
 }
 
-/********************初始化predic_value相关函数*********************/
+/********************Initialize predic_value related functions*********************/
 
-/********************初始化R_value相关函数*********************/
+/********************Initialize R_value related functions*********************/
 double *initial_R(double *metrics_data, double *predic_data, double *metrics_mean_data)
 {
 	int i;
@@ -348,25 +349,25 @@ double *get_mean(sequeue_t *queue)
 	
 }
 
-/********************初始化R_value相关函数*********************/
+/********************Initialize R_value related functions*********************/
 
 int main(){
 
 	//open file
 	FILE *fp1;
 	fp1 = fopen("paper_result.txt","w");
-	//最终变量
+	//Final variable
 	double *A,*V;
 	A = (double *)malloc(4*sizeof(double));
 	V = (double *)malloc(4*sizeof(double));
 
 
-	//初始化所需要变量
+	//Variables needed for initialization
 	int i,j;
 	double lamda[N];
 	double mean[4],std[4];
-	double *metrics_data, *predic_data, *R_data, *metrics_f_data; //处理单个数据
-	//队列
+	double *metrics_data, *predic_data, *R_data, *metrics_f_data; //Processing a single data
+	//queue
 	sequeue_t *metrics, *predic_values, *R_values;
 
 	metrics_data = (double *)malloc(4*sizeof(double));
@@ -379,13 +380,13 @@ int main(){
 		lamda[i] = 1/(double)N;
 	}
 
-	//初始化metrics
-	//初始化metrics的队列
+	//Initialize metrics
+	//Initialize the queue of metrics
 	metrics = CreateEmptySequeue();
-	//对N个metrics_data进行初始化
+	//Initialize N metrics_data
 	for(i=0;i<N;i++){
 		memcpy(metrics_data, Initial_Metrics("eth0"),4*sizeof(double));
-		if (NewEnQueue(metrics, metrics_data)==-1) return -1; //入队
+		if (NewEnQueue(metrics, metrics_data)==-1) return -1; //Enqueue
 		//printf("\t\t%lf %lf %lf %lf\n",metrics_data[0],metrics_data[1],metrics_data[2],metrics_data[3]);
 
 	}
@@ -393,31 +394,31 @@ int main(){
 
 	
 	if(FullSequeue(metrics) == 0) return -1;
-	//确定整个填充整个metrics.
+	//Make sure to fill the entire metrics.
 
-	//初始化predic_values
-	//初始化R_values
+	//Initialize predic_values
+	//Initialize R_values
 	predic_values = CreateEmptySequeue();
 	R_values = CreateEmptySequeue();
 
-	//开始对predic队列进行初始化,同时也应当初始化R队列
+	//Start to initialize the predic queue, at the same time should also initialize the R queue
 	for(i=0;i<N;i++){
-		//得到predic_data，也就是第一个值
+		//Get predic_data, which is the first value
 		memcpy(predic_data,initial_predic(metrics),4*sizeof(double));
 		if(i==0){
 			printf("the 1st predic_value is %lf %lf %lf %lf\n\n",predic_data[0],predic_data[1],predic_data[2],predic_data[3]);
 		}
-		if (NewEnQueue(predic_values,predic_data)==-1) return -1; //入队
+		if (NewEnQueue(predic_values,predic_data)==-1) return -1; //Enqueue
 		
 
 
 
-		//更新一次时间，并且更新一次metrics队列
+		//Update the time and update the metrics queue
 		memcpy(metrics_f_data,metrics_data,4*sizeof(double));
 		memcpy(metrics_f_data,get_mean(metrics),4*sizeof(double));
 		memcpy(metrics_data, Initial_Metrics("eth0"),4*sizeof(double));
 
-		//初始化R队列
+		//Initialize the R queue
 
 		printf("the %d values are :\n",i);
 		memcpy(R_data,initial_R(metrics_data, predic_data,metrics_f_data),4*sizeof(double));
@@ -440,24 +441,24 @@ int main(){
 	}
 
 
-	//第一次更新完成后，metrics是最新的metrics，但是R和predic_value都没有更新，所以如果需要比较的话，需要找到上一次的metric做比较
+	//After the first update, metrics are the latest metrics, but neither R nor predic_value are updated, so if you need to compare, you need to find the last metric to compare
 	//printQueue(metrics);
 	//printQueue(predic_values);
 	//printQueue(R_values);
 
 	if(FullSequeue(predic_values)==1) 
-		printf("predic初始化完成！\n");
+		printf("predic initialization completed！\n");
 
 
-	//初始化mean
+	//Initialize mean
 	for(i=0; i<N; i++){
 		for(j=0; j<4; j++){
-			mean[j]+=lamda[i]*R_values->data[i][j]; //首先计算累加之和
+			mean[j]+=lamda[i]*R_values->data[i][j]; //First calculate the cumulative sum
 		}
 	}
 
 
-	//初始化std
+	//Initialize std
 	for(i=0;i<N;i++){
 		for(j=0;j<4;j++){
 			std[j] += (R_values->data[i][j]-mean[j])*(R_values->data[i][j]-mean[j]);
@@ -482,7 +483,7 @@ int main(){
 	int attack_flag = 0;
 	int count_flag;
 
-	//开始正常运行，每次更新metric后，对predic和R进行更新，同时更新mean和std，然后比较A和V，如出现V>A, 则发出告警, 否则，continue
+	//Start normal operation, update predic and R each time, update mean and std at the same time, and then compare A and V. If V>A appears, an alarm will be issued, otherwise, continue
 	
 
 	while(1){
@@ -491,7 +492,7 @@ int main(){
 		//double * Initial_Metrics(char *ethernet_name);
 		memcpy(metrics_f_data,metrics_data,4*sizeof(double));
 		memcpy(metrics_f_data,get_mean(metrics),4*sizeof(double));
-		//更新metrics队列
+		//Update metrics queue
 		if ((metrics) == NULL)  return -1;
 		memcpy(metrics_data, Initial_Metrics("eth0"),4*sizeof(double));
 
@@ -502,14 +503,14 @@ int main(){
 		
 		if (NewDeQueue(metrics) == NULL)  return -1;
 		if (NewEnQueue(metrics,metrics_data) == -1) return -1;
-		//更新predic队列
+		//Update predic queue
 		memcpy(predic_data,initial_predic(metrics),4*sizeof(double));
 
 		//printf("%p, %p\n", predic_data, initial_predic(metrics));
 		if (NewDeQueue(predic_values) == NULL) return -1;
 		//printf("debug2\n");
 		if (NewEnQueue(predic_values,predic_data) == -1) return -1;
-		//更新R队列
+		//Update R queue
 		memcpy(R_data,initial_R(metrics_data, predic_data,metrics_f_data),4*sizeof(double));
 		//calculate if there is a suspected attack.
 		for(i=0; i<4; i++){
@@ -541,7 +542,7 @@ int main(){
 		//update mean
 		for(i=0; i<N; i++){
 			for(j=0; j<4; j++){
-				mean[j]+=lamda[i]*R_values->data[i][j]; //首先计算累加之和
+				mean[j]+=lamda[i]*R_values->data[i][j]; //First calculate the cumulative sum
 			}
 		}
 		for(i=0;i<4;i++){
